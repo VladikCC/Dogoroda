@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres_db:
     image: postgres:15
-    container_name: postgres
+    container_name: Gorod_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: vladik_admin
@@ -14,6 +14,19 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: Gorod_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://vladik_admin:BpVh9rokOXGEUDKwo5OsJX4rqw75xa@postgres_db:5432/dogoroda_base
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db # Backend wait db
+    networks:
+      - dogoroda_network
 
 volumes:
   pg_data:
