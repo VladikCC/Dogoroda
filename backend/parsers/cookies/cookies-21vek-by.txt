@@ -1,0 +1,7 @@
+.21vek.by	TRUE	/	FALSE	1820428629.8	Settings[ft_split_group]	150
+.21vek.by	TRUE	/	FALSE	1820428629.8	Settings[u_source]	Q3FrZQ%3D%3D.BBIfFzcABhpBXwJGV0MfElkdUU0%3D
+.21vek.by	TRUE	/	TRUE	1820450229.8	accessToken	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODg4OTI2MjksInN1YiI6ImE4ODJmNmMyLTUzMmEtNDI5MC1iNzRjLTEwYTA4ZTEyMzE0OSIsInZlciI6MC4xLCJleHAiOjE4MjA0Mzk0MjksImFubyI6MX0.UU0BNUVqWIzo615flyYj5yntZIYnVWCxvTG3Z-9T2dc
+.21vek.by	TRUE	/	TRUE	1820450229.8	refreshToken	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODg4OTI2MjksImFubyI6MSwianRpIjoiYTg4MmY2YzItNTMyYS00MjkwLWI3NGMtMTBhMDhlMTIzMTQ5IiwidmVyIjowLjEsImV4cCI6MTgyMDQzOTQyOX0.GUP8k8bLUEMnWLJXX1KAbg5je5WMnIzTxHsI1YwYr0Y
+.21vek.by	TRUE	/	FALSE	1788901199	consentMode	{%22ad_storage%22:%22denied%22%2C%22analytics_storage%22:%22denied%22%2C%22functionality_storage%22:%22denied%22}
+.21vek.by	TRUE	/	FALSE	1788901199	partner-cookies	{%22isFunctionalCookies%22:false%2C%22isAnalyticsCookies%22:false}
+.21vek.by	TRUE	/	FALSE	1820429540	ajs_anonymous_id	aa0b7b5b-e26b-4446-9d5c-0445265c5f52

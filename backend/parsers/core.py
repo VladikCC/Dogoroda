@@ -1,5 +1,11 @@
+import sys
 import requests
+from pathlib import Path
 from bs4 import BeautifulSoup
+
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
 from database.db_config import SessionLocal, Product, init_db
 
 #Automatically create tables in Postgres
