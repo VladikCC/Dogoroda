@@ -1,1 +1,4 @@
 .directory
+backend/parsers/cookies/
+__pycache__/
+*.pyc

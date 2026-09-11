@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres_db:
     image: postgres:15
@@ -14,11 +12,17 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - dogoroda_network
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     container_name: Gorod_backend
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - DATABASE_URL=postgresql://vladik_admin:BpVh9rokOXGEUDKwo5OsJX4rqw75xa@postgres_db:5432/dogoroda_base
     ports:
@@ -30,3 +34,7 @@ services:
 
 volumes:
   pg_data:
+
+networks:
+  dogoroda_network:
+    driver: bridge
