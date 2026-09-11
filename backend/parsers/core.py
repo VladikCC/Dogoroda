@@ -41,7 +41,6 @@ SHOPS_CONFIG = {
 
 
 def get_soup(url: str):
-    """Общий HTML-загрузчик для простых HTML-парсеров."""
     try:
         response = requests.get(
             url,
@@ -66,12 +65,6 @@ def get_soup(url: str):
 
 
 def save_or_update_product(product_data: dict):
-    """
-    Общий слой сохранения товара в PostgreSQL.
-
-    Парсеры сами получают и разбирают данные,
-    а сюда передают уже нормализованный product_data.
-    """
 
     db = SessionLocal()
 
@@ -155,14 +148,7 @@ def universal_shop_parser(
     url: str,
     base_domain: str = "",
 ):
-    """
-    Универсальный HTML-парсер для магазинов,
-    которые можно описать через SHOPS_CONFIG.
-
-    Сложные сайты вроде 21vek могут иметь
-    собственный parser и собственный get_soup().
-    """
-
+  
     if shop_name not in SHOPS_CONFIG:
         print(
             f"[Core] Конфигурация для магазина "
