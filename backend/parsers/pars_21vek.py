@@ -158,6 +158,10 @@ def parse_21vek(search_name: str):
             )
             continue
 
+        if search_name.casefold() not in title.casefold():
+            print(f"Пропускаем {title}: нет '{search_name}' в названии")
+            continue
+
         price = (
             item.get("salePrice")
             or item.get("price")
