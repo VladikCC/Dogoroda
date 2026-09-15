@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 
 from database.db_config import init_db, save_product
 
-
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -113,6 +112,7 @@ def parse_onliner(search_name: str):
         img_url = product.find("img")["src"]
 
         product = save_product(
+            shop_product_id='',
             title=title,
             price=price,
             product_url=url,
@@ -136,7 +136,7 @@ def parse_onliner(search_name: str):
         )
         print(
             f"Товар: "
-            f"{product.url}"
+            f"{product.product_url}"
         )
         print(
             f"Фото: "

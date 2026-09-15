@@ -14,7 +14,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://vladik_admin:YOUR_PASSWORD@localhost:5432/dogoroda_base"
+    "postgresql://vladik_admin:BpVh9rokOXGEUDKwo5OsJX4rqw75xa@localhost:5432/dogoroda_base"
 )
 
 
