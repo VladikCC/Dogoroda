@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import hashlib
 
 import requests
 from bs4 import BeautifulSoup
@@ -109,13 +110,17 @@ def parse_onliner(search_name: str):
             )
             continue
 
+        product_url = product.find("a")["href"]
         img_url = product.find("img")["src"]
+        shop_id = hashlib.sha256(
+            url.encode("utf-8")
+        ).hexdigest()
 
         product = save_product(
-            shop_product_id='',
+            shop_product_id=shop_id,
             title=title,
             price=price,
-            product_url=url,
+            product_url=product_url,
             img_url=img_url,
             shop_name="onliner",
             currency="BYN",
