@@ -65,6 +65,8 @@ def parse_onliner(search_name: str):
             "Not found"
         )
 
+    products = products[:6]
+
     for product in products:
 
         title = product.find_all("a", {"class": "catalog-form__link"})[1].text
