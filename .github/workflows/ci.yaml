@@ -20,9 +20,10 @@ concurrency:
 
 jobs:
   test:
-    name: Lint and Docker integration tests
+
+    name: Code tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -46,16 +47,41 @@ jobs:
             --show-source \
             --statistics
 
+      - name: Create CI environment file
+        run: |
+          cat > .env <<'EOF'
+          POSTGRES_USER=dogoroda_ci
+          POSTGRES_PASSWORD=ci_only_password
+          POSTGRES_DB=dogoroda_ci
+          EOF
+
       - name: Validate Docker Compose
         run: docker compose config -q
 
       - name: Build and start services
         run: docker compose up -d --build
 
+      - name: Wait for PostgreSQL
+        run: |
+          for i in $(seq 1 40); do
+            if docker compose exec -T postgres_db \
+              pg_isready -U dogoroda_ci -d dogoroda_ci; then
+              echo "PostgreSQL is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "PostgreSQL did not become ready"
+          docker compose ps
+          docker compose logs --no-color postgres_db
+          exit 1
+
       - name: Wait for backend
         run: |
-          for i in $(seq 1 30); do
-            if curl -fsS http://localhost:8000/ \
+          for i in $(seq 1 40); do
+            if curl --fail --silent --show-error \
+              http://localhost:8000/openapi.json \
               -o /dev/null; then
               echo "Backend is responding"
               exit 0
@@ -65,14 +91,14 @@ jobs:
 
           echo "Backend did not become ready"
           docker compose ps
-          docker compose logs --no-color
+          docker compose logs --no-color backend
           exit 1
 
       - name: Wait for frontend
         run: |
-          for i in $(seq 1 30); do
-            if curl -fsS http://localhost:80/ \
-              -o /dev/null; then
+          for i in $(seq 1 40); do
+            if curl --fail --silent --show-error \
+              http://localhost:80/ -o /dev/null; then
               echo "Frontend is responding"
               exit 0
             fi
@@ -81,14 +107,19 @@ jobs:
 
           echo "Frontend did not become ready"
           docker compose ps
-          docker compose logs --no-color
+          docker compose logs --no-color frontend
           exit 1
 
-      - name: Show service status
+      - name: Check frontend static JavaScript
+        run: |
+          curl --fail --silent --show-error \
+            http://localhost:80/app.js -o /dev/null
+
+      - name: Show service status and logs
         if: always()
         run: |
-          docker compose ps
-          docker compose logs --no-color
+          docker compose ps || true
+          docker compose logs --no-color || true
 
       - name: Stop services
         if: always()
