@@ -18,7 +18,7 @@ services:
   backend:
     build:
       context: ./backend
-      network: host
+  #network: host костыль для сборки билда нужен но руинит cicd так как локалка открытая опасно
     container_name: Gorod_backend
     restart: unless-stopped
     dns:
