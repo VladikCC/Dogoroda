@@ -7,7 +7,7 @@ const button = document.querySelector("button");
 const input = document.querySelector("input");
 button.addEventListener("click", (event) => {
     const query = input.value;
-    const url = `http://127.0.0.1:8001/search/${query}`;
+    const url = `/search/${encodeURIComponent(query)}`;
 
     let dots = window.setInterval(() => {
         if (loading.innerHTML.length > 2)
