@@ -9,6 +9,8 @@ button.addEventListener("click", (event) => {
     const query = input.value;
     const url = `http://127.0.0.1:8001/search/${query}`;
 
+    results.replaceChildren();
+
     let dots = window.setInterval(() => {
         if (loading.innerHTML.length > 2)
             loading.innerHTML = '.'
@@ -38,7 +40,7 @@ async function getData(url) {
         result.items.forEach(item => {
             const resultHtml = `
                 <div style="display: flex; ">
-                    <img style="padding-right: 12px; height: 150px; width: 150px" src="${item.img}">
+                    <img style="padding-right: 12px; height: 150px;" src="${item.img}">
                     <div>
                         <a src="${item.url}"><h2>${item.title}</h2></a>
                         <h2>${item.price}</h2>
