@@ -59,6 +59,12 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose config -q
 
+   #nerwork host error костыль по факту
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
       - name: Build and start services
         run: docker compose up -d --build
 
