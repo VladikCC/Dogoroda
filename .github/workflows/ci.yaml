@@ -39,13 +39,14 @@ jobs:
       - name: Install lint dependencies
         run: python -m pip install flake8
 
-      - name: Lint backend
+      - name: lint backend
         run: |
           flake8 ./backend \
-            --count \
-            --select=E9,F63,F7,F82 \
-            --show-source \
-            --statistics
+          --count \
+          --select=E9,F63,F7,F82 \
+          --show-source \
+          --statistics \
+          --exclude=backend/venv,.venv,venv,__pycache__
 
       - name: Create CI environment file
         run: |
@@ -123,4 +124,8 @@ jobs:
 
       - name: Stop services
         if: always()
+        env:
+            POSTGRES_USER: dogoroda_ci
+            POSTGRES_PASSWORD: ci_only_password
+            POSTGRES_DB: dogoroda_ci
         run: docker compose down --remove-orphans
