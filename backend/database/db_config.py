@@ -1,3 +1,4 @@
+
 import os
 from datetime import datetime
 
@@ -11,10 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://vladik_admin:BpVh9rokOXGEUDKwo5OsJX4rqw75xa@localhost:5432/dogoroda_base"
-)
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 
 engine = create_engine(
@@ -114,8 +112,7 @@ def save_product(
         )
 
         if existing_product:
-
-            #update product
+            # update product
             existing_product.shop_product_id = shop_product_id
             existing_product.title = title
             existing_product.price = price
@@ -127,7 +124,6 @@ def save_product(
             product = existing_product
 
         else:
-
             product = Product(
                 shop_product_id=shop_product_id,
                 title=title,
