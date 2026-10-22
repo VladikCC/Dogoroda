@@ -4,10 +4,10 @@ services:
     container_name: Gorod_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: vladik_admin
-      POSTGRES_PASSWORD: BpVh9rokOXGEUDKwo5OsJX4rqw75xa
-      POSTGRES_DB: dogoroda_base
-#use loc ports todo ports servers
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+  #use loc ports todo ports servers
     ports:
       - "5432:5432"
     volumes:
@@ -18,17 +18,30 @@ services:
   backend:
     build:
       context: ./backend
+  #network: host костыль для сборки билда нужен но руинит cicd так как локалка открытая опасно
     container_name: Gorod_backend
     restart: unless-stopped
     dns:
       - 8.8.8.8
       - 8.8.4.4
     environment:
-      - DATABASE_URL=postgresql://vladik_admin:BpVh9rokOXGEUDKwo5OsJX4rqw75xa@postgres_db:5432/dogoroda_base
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}
     ports:
       - "8000:8000"
     depends_on:
       - postgres_db # Backend wait db
+    networks:
+      - dogoroda_network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: Gorod_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - dogoroda_network
 
