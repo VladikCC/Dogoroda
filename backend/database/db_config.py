@@ -6,7 +6,6 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
-    Float,
     DateTime,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -55,7 +54,7 @@ class Product(Base):
     )
 
     price = Column(
-        Float,
+        String,
         nullable=False,
     )
 
@@ -97,10 +96,10 @@ def save_product(
     *,
     shop_product_id: str,
     title: str,
-    price: float,
+    price: str,
     product_url: str,
     img_url: str | None = None,
-    shop_name: str = "21vek",
+    shop_name: str,
     currency: str = "BYN",
 ):
     db = SessionLocal()

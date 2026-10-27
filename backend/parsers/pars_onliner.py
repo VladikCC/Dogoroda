@@ -90,7 +90,7 @@ def parse_onliner(search_name: str):
             )
             continue
 
-        if isinstance(price, str):
+        try:
             price = (
                 price
                 .replace("от ", "")
@@ -98,9 +98,6 @@ def parse_onliner(search_name: str):
                 .replace(",", ".")
                 .replace("ƃ", "")
             )
-
-        try:
-            price = float(price.replace("от ", "").replace("ƃ", ""))
 
         except (
             ValueError,

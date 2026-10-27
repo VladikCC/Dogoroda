@@ -181,19 +181,6 @@ def parse_21vek(search_name: str):
                 .replace(",", ".")
             )
 
-        try:
-            price = float(price)
-
-        except (
-            ValueError,
-            TypeError,
-        ):
-            print(
-                f"Не удалось обработать цену: "
-                f"{price}"
-            )
-            continue
-
         product_url = (
             item.get("link")
             or item.get("url")
