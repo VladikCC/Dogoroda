@@ -83,7 +83,7 @@ def save_or_update_product(product_data: dict):
                 product_data.get("shop_product_id")
             )
             existing.title = product_data["title"]
-            existing.price = float(product_data["price"])
+            existing.price = product_data["price"]
             existing.img_url = product_data.get("img_url")
             existing.shop_name = product_data["shop_name"]
 
@@ -106,7 +106,7 @@ def save_or_update_product(product_data: dict):
                     product_data.get("shop_product_id")
                 ),
                 "title": product_data["title"],
-                "price": float(product_data["price"]),
+                "price": product_data["price"],
                 "product_url": product_data["product_url"],
                 "img_url": product_data.get("img_url"),
                 "shop_name": product_data["shop_name"],
@@ -249,7 +249,7 @@ def universal_shop_parser(
                 continue
 
             try:
-                price = float(price_clean)
+                price = price_clean
 
             except ValueError:
 
@@ -260,11 +260,7 @@ def universal_shop_parser(
                 )
 
                 if len(price_only_digits) > 2:
-                    price = float(
-                        price_only_digits[:-2]
-                        + "."
-                        + price_only_digits[-2:]
-                    )
+                    price = price_only_digits[:-2] + "." + price_only_digits[-2:]
                 else:
                     continue
 
