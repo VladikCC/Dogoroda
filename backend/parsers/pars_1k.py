@@ -5,7 +5,7 @@ import hashlib
 import requests
 from bs4 import BeautifulSoup
 
-from backend.database.db_config import init_db, save_product
+from database.db_config import init_db, save_product
 
 HEADERS = {
     "User-Agent": (

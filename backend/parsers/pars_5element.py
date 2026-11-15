@@ -1,176 +1,20 @@
-import json
-from pathlib import Path
-import hashlib
+from urllib.parse import urljoin
 
 import requests
-from bs4 import BeautifulSoup
 
-from database.db_config import init_db, save_product
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept": (
-        "text/html,application/xhtml+xml,application/xml;"
-        "q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
-    ),
-}
+from database.db_config import save_product
 
 
-def get_soup(url: str):
-    response = requests.get(
-        url,
-        headers=HEADERS,
-        timeout=30,
-    )
-
+def parse_5element(search_name: str):
+    query = search_name.strip()
+    if not query:
+        raise ValueError('Название товара не может быть пустым')
+    response = requests.get('https://sort.diginetica.net/search', params={'apiKey': '08IE0509XQ', 'st': query, 'strategy': 'advanced_xname', 'fullData': 'true', 'size': 20}, timeout=30)
     response.raise_for_status()
-
-    return BeautifulSoup(
-        response.text,
-        "html.parser",
-    )
-
-
-def parse_onliner(search_name: str):
-    saved_products = []
-    
-    search_name = search_name.strip()
-
-    if not search_name:
-        raise ValueError(
-            "Название товара не может быть пустым"
-        )
-
-    url = (
-        "https://catalog.onliner.by/search?q="
-        f"{requests.utils.quote(search_name)}"
-    )
-
-    print(f"Searching: {search_name}")
-    print(f"URL: {url}")
-
-    soup = get_soup(url)
-
-    products = soup.find_all(
-        "div",
-        {"class": "catalog-form__offers-item"},
-    )
-
-    if not products:
-        raise RuntimeError(
-            "Not found"
-        )
-
-    products = products[:6]
-
-    for product in products:
-
-        title = product.find_all("a", {"class": "catalog-form__link"})[1].text
-        if not title:
-            print(
-                "Пропускаем товар: "
-                "нет названия"
-            )
+    data = response.json()
+    products = []
+    for item in data['products']:
+        if not item.get('id') or not item.get('name') or not item.get('link_url') or item.get('price') is None:
             continue
-
-        if search_name.casefold() not in title.casefold():
-            print(f"Пропускаем {title}: нет '{search_name}' в названии")
-            continue
-
-        price = product.find("a", {"class": "catalog-form__link"}).text
-
-        if price is None:
-            print(
-                f"Пропускаем {title}: "
-                "нет цены"
-            )
-            continue
-
-        if isinstance(price, str):
-            price = (
-                price
-                .replace("от ", "")
-                .replace(" ", "")
-                .replace(",", ".")
-                .replace("ƃ", "")
-            )
-
-        try:
-            price = float(price.replace("от ", "").replace("ƃ", ""))
-
-        except (
-            ValueError,
-            TypeError,
-        ):
-            print(
-                f"Не удалось обработать цену: "
-                f"{price}"
-            )
-            continue
-
-        product_url = product.find("a")["href"]
-        img_url = product.find("img")["src"]
-        shop_id = hashlib.sha256(
-            url.encode("utf-8")
-        ).hexdigest()
-
-        product = save_product(
-            shop_product_id=shop_id,
-            title=title,
-            price=price,
-            product_url=product_url,
-            img_url=img_url,
-            shop_name="onliner",
-            currency="BYN",
-        )
-
-        saved_products.append(product)
-
-        print()
-        print("SAVED:")
-        print(
-            f"Название: "
-            f"{product.title}"
-        )
-        print(
-            f"Цена: "
-            f"{product.price} "
-            f"{product.currency}"
-        )
-        print(
-            f"Товар: "
-            f"{product.product_url}"
-        )
-        print(
-            f"Фото: "
-            f"{product.img_url}"
-        )
-
-    return saved_products
-
-
-if __name__ == "__main__":
-
-    init_db()
-
-    name = input("name: ")
-
-    try:
-
-        products = parse_onliner(name)
-
-        print()
-        print(
-            f"Saved to database: "
-            f"{len(products)} products"
-        )
-
-    except Exception as error:
-
-        print(
-            f"Parser error: {error}"
-        )
+        products.append(save_product(shop_product_id=str(item['id']), title=item['name'], price=str(item['price']), product_url=urljoin('https://5element.by', item['link_url']), img_url=item.get('image_url'), shop_name='5element', currency='BYN'))
+    return products

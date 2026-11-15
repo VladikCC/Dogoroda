@@ -1,9 +1,18 @@
+import logging
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from database.db_config import SessionLocal, Product, init_db
 
 from parsers.pars_onliner import parse_onliner
 from parsers.pars_21vek import parse_21vek
+from parsers.pars_1k import parse_1k
+from parsers.pars_shopby import parse_shopby
+from parsers.pars_xistore import parse_xistore
+from parsers.pars_silaby import parse_silaby
+from parsers.pars_5element import parse_5element
+from parsers.pars_mts import parse_mts
+from parsers.pars_foxstore import parse_foxstore
 
 init_db()
 
@@ -45,17 +54,19 @@ async def home():
     return {"status": "working", "message": "Welcome to Dogoroda.store Backend API!"}
 
 @app.get("/search/{search}")
-async def find_stuff(search: str):
-    results = [
-        parse_onliner(search),
-        parse_21vek(search)
-    ]
+def find_stuff(search: str):
+    results = []
+    for parser in (parse_onliner, parse_21vek, parse_1k, parse_shopby, parse_xistore, parse_silaby, parse_5element, parse_mts, parse_foxstore):
+        try:
+            results.append(parser(search))
+        except Exception:
+            logging.exception("Search failed in %s", parser.__name__)
 
     result = []
 
     for shop in results:
-        item = Item()
         for res in shop:
+            item = Item()
             item.title = res.title
             item.price = res.price
             item.img = res.img_url
