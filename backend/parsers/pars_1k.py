@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
 import hashlib
+import re
 
 import requests
+from rapidfuzz import fuzz
 from bs4 import BeautifulSoup
 
 from database.db_config import init_db, save_product
@@ -42,7 +44,7 @@ def parse_1k(search_name: str):
 
     if not search_name:
         raise ValueError(
-            "Название товара не может быть пустым"
+            "[1k] Название товара не может быть пустым"
         )
 
     url = (
@@ -50,8 +52,8 @@ def parse_1k(search_name: str):
         f"{requests.utils.quote(search_name)}"
     )
 
-    print(f"Searching: {search_name}")
-    print(f"URL: {url}")
+    print("[1k]", f"Searching: {search_name}")
+    print("[1k]", f"URL: {url}")
 
     soup = get_soup(url)
 
@@ -59,8 +61,6 @@ def parse_1k(search_name: str):
         "div",
         {"class": "prod prod--toggle"},
     )
-
-    print(products,  len(products))
 
     if not products:
         raise RuntimeError(
@@ -71,19 +71,24 @@ def parse_1k(search_name: str):
         title = product.find_all("a", {"class": "prod__link"})[0].text
         if not title:
             print(
+            "[1k]",
                 "Пропускаем товар: "
                 "нет названия"
             )
             continue
 
-        if search_name.casefold() not in title.casefold():
-            print(f"Пропускаем {title}: нет '{search_name}' в названии")
+        search_re = re.sub(r'[^a-zA-Z0-9/ ]', '', search_name.lower())
+        title_re = re.sub(r'[^a-zA-Z0-9/ ]', '', title.lower())
+
+        if search_re not in title_re and fuzz.token_set_ratio(search_re, title_re.strip()) < 90:
+            print("[1k]", f"Пропускаем {title}: нет '{search_name}' в названии")
             continue
 
         price = product.find("span", {"class": "money__val"}).text
 
         if price is None:
             print(
+            "[1k]",
                 f"Пропускаем {title}: "
                 "нет цены"
             )
@@ -96,6 +101,9 @@ def parse_1k(search_name: str):
         shop_id = hashlib.sha256(
             url.encode("utf-8")
         ).hexdigest()
+
+        if re.fullmatch(r'[+-]?0+(?:[.,]0+)?', str(price).strip().replace(' ', '')):
+            continue
 
         product = save_product(
             shop_product_id=shop_id,
@@ -110,21 +118,25 @@ def parse_1k(search_name: str):
         saved_products.append(product)
 
         print()
-        print("SAVED:")
+        print("[1k]", "SAVED:")
         print(
+            "[1k]",
             f"Название: "
             f"{product.title}"
         )
         print(
+            "[1k]",
             f"Цена: "
             f"{product.price} "
             f"{product.currency}"
         )
         print(
+            "[1k]",
             f"Товар: "
             f"{product.product_url}"
         )
         print(
+            "[1k]",
             f"Фото: "
             f"{product.img_url}"
         )
@@ -140,6 +152,7 @@ if __name__ == "__main__":
 
     products = parse_1k(name)
     print(
-        f"\nSaved to database: "
+            "[1k]",
+        f"Saved to database: "
         f"{len(products)} products"
     )

@@ -249,7 +249,7 @@ def universal_shop_parser(
                 continue
 
             try:
-                price = price_clean
+                price = float(price_clean)
 
             except ValueError:
 
@@ -260,7 +260,7 @@ def universal_shop_parser(
                 )
 
                 if len(price_only_digits) > 2:
-                    price = price_only_digits[:-2] + "." + price_only_digits[-2:]
+                    price = float(price_only_digits[:-2] + "." + price_only_digits[-2:])
                 else:
                     continue
 

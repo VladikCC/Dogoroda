@@ -5,7 +5,8 @@ const loading = document.getElementById("loading")
 
 const button = document.querySelector("button");
 const input = document.querySelector("input");
-button.addEventListener("click", (event) => {
+
+button.addEventListener("click", () => {
     const query = input.value;
     const url = `/search/${encodeURIComponent(query)}`;
 
@@ -23,6 +24,13 @@ button.addEventListener("click", (event) => {
         clearInterval(dots)
         loading.innerHTML = ''
     });
+})
+
+
+document.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        button.click()
+    }
 })
 
 async function getData(url) {

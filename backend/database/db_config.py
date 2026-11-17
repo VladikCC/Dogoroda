@@ -6,6 +6,7 @@ from sqlalchemy import (
     create_engine,
     Column,
     Integer,
+    Float,
     String,
     DateTime,
 )
@@ -52,7 +53,7 @@ class Product(Base):
     )
 
     price = Column(
-        String,
+        Float,
         nullable=False,
     )
 
@@ -94,12 +95,13 @@ def save_product(
     *,
     shop_product_id: str,
     title: str,
-    price: str,
+    price: str | float,
     product_url: str,
     img_url: str | None = None,
     shop_name: str,
     currency: str = "BYN",
 ):
+    price = float("".join(str(price).split()).replace(",", "."))
     db = SessionLocal()
 
     try:
