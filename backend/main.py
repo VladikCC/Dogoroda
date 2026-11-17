@@ -92,3 +92,11 @@ def find_stuff(search: str):
 #         return {"error": f"Database search failed: {e}"}
 #     finally:
 #         db.close()
+
+
+""" TODO
+ first, should implement fuzzy search
+  second, need to group all the results. like, the same items from different shops are united into a single group with lowest price shown,
+  and different items are separated. reduces clutter and improves readability
+   third, search usually gives hundreds of results. that's normal, shops sites work similarly
+"""

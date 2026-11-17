@@ -42,7 +42,7 @@ def parse_onliner(search_name: str):
 
     if not search_name:
         raise ValueError(
-            "Название товара не может быть пустым"
+            "[Kufar] Название товара не может быть пустым"
         )
 
     url = (
@@ -50,8 +50,8 @@ def parse_onliner(search_name: str):
         f"{requests.utils.quote(search_name)}"
     )
 
-    print(f"Searching: {search_name}")
-    print(f"URL: {url}")
+    print("[Kufar]", f"Searching: {search_name}")
+    print("[Kufar]", f"URL: {url}")
 
     soup = get_soup(url)
 
@@ -72,19 +72,21 @@ def parse_onliner(search_name: str):
         title = product.find_all("a", {"class": "catalog-form__link"})[1].text
         if not title:
             print(
+            "[Kufar]",
                 "Пропускаем товар: "
                 "нет названия"
             )
             continue
 
         if search_name.casefold() not in title.casefold():
-            print(f"Пропускаем {title}: нет '{search_name}' в названии")
+            print("[Kufar]", f"Пропускаем {title}: нет '{search_name}' в названии")
             continue
 
         price = product.find("a", {"class": "catalog-form__link"}).text
 
         if price is None:
             print(
+            "[Kufar]",
                 f"Пропускаем {title}: "
                 "нет цены"
             )
@@ -107,6 +109,7 @@ def parse_onliner(search_name: str):
             TypeError,
         ):
             print(
+            "[Kufar]",
                 f"Не удалось обработать цену: "
                 f"{price}"
             )
@@ -131,21 +134,25 @@ def parse_onliner(search_name: str):
         saved_products.append(product)
 
         print()
-        print("SAVED:")
+        print("[Kufar]", "SAVED:")
         print(
+            "[Kufar]",
             f"Название: "
             f"{product.title}"
         )
         print(
+            "[Kufar]",
             f"Цена: "
             f"{product.price} "
             f"{product.currency}"
         )
         print(
+            "[Kufar]",
             f"Товар: "
             f"{product.product_url}"
         )
         print(
+            "[Kufar]",
             f"Фото: "
             f"{product.img_url}"
         )
@@ -165,6 +172,7 @@ if __name__ == "__main__":
 
         print()
         print(
+            "[Kufar]",
             f"Saved to database: "
             f"{len(products)} products"
         )
@@ -172,5 +180,6 @@ if __name__ == "__main__":
     except Exception as error:
 
         print(
+            "[Kufar]",
             f"Parser error: {error}"
         )

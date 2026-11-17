@@ -1,9 +1,12 @@
 import json
 from pathlib import Path
+import re
 import hashlib
 
 import requests
 from bs4 import BeautifulSoup
+
+from rapidfuzz import fuzz
 
 from database.db_config import init_db, save_product
 
@@ -42,7 +45,7 @@ def parse_onliner(search_name: str):
 
     if not search_name:
         raise ValueError(
-            "Название товара не может быть пустым"
+            "[Onliner] Название товара не может быть пустым"
         )
 
     url = (
@@ -50,8 +53,8 @@ def parse_onliner(search_name: str):
         f"{requests.utils.quote(search_name)}"
     )
 
-    print(f"Searching: {search_name}")
-    print(f"URL: {url}")
+    print("[Onliner]", f"Searching: {search_name}")
+    print("[Onliner]", f"URL: {url}")
 
     soup = get_soup(url)
 
@@ -72,19 +75,25 @@ def parse_onliner(search_name: str):
         title = product.find_all("a", {"class": "catalog-form__link"})[1].text
         if not title:
             print(
+            "[Onliner]",
                 "Пропускаем товар: "
                 "нет названия"
             )
             continue
 
-        if search_name.casefold() not in title.casefold():
-            print(f"Пропускаем {title}: нет '{search_name}' в названии")
+        search_re = re.sub(r'[^a-zA-Z0-9/ ]', '', search_name.lower())
+        title_re = re.sub(r'[^a-zA-Z0-9/ ]', '', title.lower())
+        fuzziness = fuzz.token_set_ratio(search_re, title_re.strip())
+
+        if search_re not in title_re and fuzziness < 90:      
+            print("[Onliner]", f"Пропускаем {title}: нет '{search_name}' в названии, точность поиска {fuzziness}")
             continue
 
         price = product.find("a", {"class": "catalog-form__link"}).text
 
         if price is None:
             print(
+            "[Onliner]",
                 f"Пропускаем {title}: "
                 "нет цены"
             )
@@ -104,6 +113,7 @@ def parse_onliner(search_name: str):
             TypeError,
         ):
             print(
+            "[Onliner]",
                 f"Не удалось обработать цену: "
                 f"{price}"
             )
@@ -114,6 +124,9 @@ def parse_onliner(search_name: str):
         shop_id = hashlib.sha256(
             url.encode("utf-8")
         ).hexdigest()
+
+        if re.fullmatch(r'[+-]?0+(?:[.,]0+)?', str(price).strip().replace(' ', '')):
+            continue
 
         product = save_product(
             shop_product_id=shop_id,
@@ -128,21 +141,25 @@ def parse_onliner(search_name: str):
         saved_products.append(product)
 
         print()
-        print("SAVED:")
+        print("[Onliner]", "SAVED:")
         print(
+            "[Onliner]",
             f"Название: "
             f"{product.title}"
         )
         print(
+            "[Onliner]",
             f"Цена: "
             f"{product.price} "
             f"{product.currency}"
         )
         print(
+            "[Onliner]",
             f"Товар: "
             f"{product.product_url}"
         )
         print(
+            "[Onliner]",
             f"Фото: "
             f"{product.img_url}"
         )
@@ -162,6 +179,7 @@ if __name__ == "__main__":
 
         print()
         print(
+            "[Onliner]",
             f"Saved to database: "
             f"{len(products)} products"
         )
@@ -169,5 +187,6 @@ if __name__ == "__main__":
     except Exception as error:
 
         print(
+            "[Onliner]",
             f"Parser error: {error}"
         )

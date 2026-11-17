@@ -1,7 +1,9 @@
+import re
 import json
 from pathlib import Path
 
 import requests
+from rapidfuzz import fuzz
 from bs4 import BeautifulSoup
 
 from database.db_config import init_db, save_product
@@ -35,6 +37,7 @@ def parse_cookies(cookies_file: Path):
 
     if not cookies_file.exists():
         print(
+            "[21vek]",
             f"Cookies file not found: {cookies_file}"
         )
         return cookies
@@ -86,7 +89,7 @@ def parse_21vek(search_name: str):
 
     if not search_name:
         raise ValueError(
-            "Название товара не может быть пустым"
+            "[21vek] Название товара не может быть пустым"
         )
 
     url = (
@@ -95,8 +98,8 @@ def parse_21vek(search_name: str):
         f"{requests.utils.quote(search_name)}"
     )
 
-    print(f"Searching: {search_name}")
-    print(f"URL: {url}")
+    print("[21vek]", f"Searching: {search_name}")
+    print("[21vek]", f"URL: {url}")
 
     soup = get_soup(url)
 
@@ -126,7 +129,7 @@ def parse_21vek(search_name: str):
     )
 
     if not products:
-        print("Products not found")
+        print("[21vek]", "Products not found")
         return []
 
     saved_products = []
@@ -140,6 +143,7 @@ def parse_21vek(search_name: str):
 
         if shop_product_id is None:
             print(
+            "[21vek]",
                 "Пропускаем товар: "
                 "нет ID"
             )
@@ -153,22 +157,28 @@ def parse_21vek(search_name: str):
 
         if not title:
             print(
+            "[21vek]",
                 "Пропускаем товар: "
                 "нет названия"
             )
             continue
 
-        if search_name.casefold() not in title.casefold():
-            print(f"Пропускаем {title}: нет '{search_name}' в названии")
+        search_re = re.sub(r'[^a-zA-Z0-9/ ]', '', search_name.lower())
+        title_re = re.sub(r'[^a-zA-Z0-9/ ]', '', title.lower())
+        fuzziness = fuzz.token_set_ratio(search_re, title_re.strip())
+
+        if search_re not in title_re and fuzziness < 90:
+            print("[21vek]", f"Пропускаем {title}: нет '{search_name}' в названии")
             continue
 
         price = (
-            item.get("salePrice")
-            or item.get("price")
+            item.get("salePrice") if item.get("salePrice") is not None
+            else item.get("price")
         )
 
         if price is None:
             print(
+            "[21vek]",
                 f"Пропускаем {title}: "
                 "нет цены"
             )
@@ -189,6 +199,7 @@ def parse_21vek(search_name: str):
 
         if not product_url:
             print(
+            "[21vek]",
                 f"Пропускаем {title}: "
                 "нет URL товара"
             )
@@ -211,6 +222,9 @@ def parse_21vek(search_name: str):
                 + img_url
             )
 
+        if re.fullmatch(r'[+-]?0+(?:[.,]0+)?', str(price).strip().replace(' ', '')):
+            continue
+
         product = save_product(
             shop_product_id=shop_product_id,
             title=title,
@@ -224,25 +238,30 @@ def parse_21vek(search_name: str):
         saved_products.append(product)
 
         print()
-        print("SAVED:")
+        print("[21vek]", "SAVED:")
         print(
+            "[21vek]",
             f"ID сайта: "
             f"{product.shop_product_id}"
         )
         print(
+            "[21vek]",
             f"Название: "
             f"{product.title}"
         )
         print(
+            "[21vek]",
             f"Цена: "
             f"{product.price} "
             f"{product.currency}"
         )
         print(
+            "[21vek]",
             f"Товар: "
             f"{product.product_url}"
         )
         print(
+            "[21vek]",
             f"Фото: "
             f"{product.img_url}"
         )
@@ -262,6 +281,7 @@ if __name__ == "__main__":
 
         print()
         print(
+            "[21vek]",
             f"Saved to database: "
             f"{len(products)} products"
         )
@@ -269,5 +289,6 @@ if __name__ == "__main__":
     except Exception as error:
 
         print(
+            "[21vek]",
             f"Parser error: {error}"
         )
